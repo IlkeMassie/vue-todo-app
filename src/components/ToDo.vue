@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import TodoItem from './TodoItem.vue';
 import CategoryItem from './CategoryItem.vue';
 import AddTodoForm from './AddTodoForm.vue';
+import AddCategoryForm from './AddCategoryForm.vue';
 
 
 type Category ={
@@ -15,32 +16,22 @@ type Category ={
 type Todo = {
   title: string;
   completed: boolean;
-  category: string;
+  category: Category | null;
 };
 
-const todos = ref<Todo[]>([{title: "Example", completed: false, category: ''}])
+const todos = ref<Todo[]>([{title: "Example", completed: false, category: {title: '', color: ''}}])
 const categories = ref<Category[]>([{title: 'Urgent', color:"#CCC"}])
-
-const newCategory = ref('');
-const newCategoryColor = ref('');
 
 
 //add a new to do
 function addTodo(newTodo: string) {
-
     if(newTodo != "") {
-        todos.value.push({title: newTodo, completed: false, category: ''})
+        todos.value.push({title: newTodo, completed: false, category: {title: '', color: ''}})
     }
 }
 
-function addCategory(event: Event){
-    event.preventDefault();
-
-    if(newCategory.value != ""){
-        categories.value.push({title: newCategory.value, color: newCategoryColor.value});
-        console.log(categories.value[1])
-        newCategory.value='';
-    }
+function addCategory(newCategory: string, newCategoryColor: string){
+    categories.value.push({title: newCategory, color: newCategoryColor});
 }
 
 //delete 1 item starting from the index passed from child component 'TodoItem'
@@ -52,6 +43,14 @@ function deleteTodo(index: number){
 function toggleCompleted(index: number){
     todos.value[index].completed  = !todos.value[index].completed;
 }
+
+// TODO
+//To change the category of a todo
+const updateCategory = (payload: { index: any; newCategory: any; }) => {
+    const { index, newCategory } = payload; // Destructure the payload
+    // Update your todo or perform other actions based on the newCategory
+    todos.value[index].category = newCategory; // Example of how you might update a todo
+};
 
 </script>
 
@@ -67,13 +66,12 @@ function toggleCompleted(index: number){
                 </CategoryItem>
             </ul>
 
+            <AddCategoryForm
+                @addCategory="addCategory">
+            </AddCategoryForm>
 
             
-            <form @submit="addCategory">
-                <input type="color" class="color-picker" v-model="newCategoryColor">
-                <input class="textField" type="text" v-model="newCategory">
-                <button id="newCategory" class="button-1" type="submit">Add</button>
-            </form>
+
         </aside>
 
         <main>
@@ -84,8 +82,13 @@ function toggleCompleted(index: number){
                     :title="item.title" 
                     :index="index"
                     :completed="item.completed"
+                    :categories="categories"
+                    :todoCategoryTitle="item.category?.title"
+                    :todoCategoryColor="item.category?.color"
+
                     @deleteTodo="deleteTodo"
-                    @toggleCompleted="toggleCompleted">
+                    @toggleCompleted="toggleCompleted"
+                    @updateCategory="updateCategory">
                 </TodoItem>
 
             </ul>   
@@ -100,6 +103,9 @@ function toggleCompleted(index: number){
 
         <footer>
             <p><a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Google - Flaticon</a></p>
+            <p><a href="https://www.flaticon.com/free-icons/price" title="price icons">Price icons created by edt.im - Flaticon</a></p>
+            <p><a href="https://www.flaticon.com/free-icons/price" title="price icons">Price icons created by Freepik - Flaticon</a></p>
+
         </footer> 
 
 
@@ -113,7 +119,7 @@ function toggleCompleted(index: number){
     display: grid;
     grid-template-columns: 0.8fr 2.2fr;
     min-height: 100vh;
-    grid-template-rows: auto 100px;
+    grid-template-rows: auto 120px;
   }
 
 h1 {
@@ -124,13 +130,8 @@ h1 {
 .button-1 {
     margin-left: -50px;
 }
-#newTodo{
-    background-color: #DB5461;
-}
 
-#newCategory{
-    background-color: rgb(136, 136, 136);
-}
+
 input:focus{
     outline: none;
 }
@@ -166,6 +167,9 @@ input {
 a {
     text-decoration: none;
     color: black;
+}
+p {
+    margin: 0;
 }
 
 

@@ -16,21 +16,20 @@ const addTodo = () => {
     newTodo.value = '';
   }
 };
-
 </script>
 
 
 <template>
     <form @submit.prevent="addTodo">
         <input class="textField" type="text" v-model="newTodo">
-        <button id="newTodo" class="button-1" type="submit">New todo</button>
+        <button id="newTodoBtn" class="button-1" type="submit">New todo</button>
     </form>
 </template>
 
 <style scoped>
 
 
-#newTodo{
+#newTodoBtn{
     background-color: #DB5461;
 }
 

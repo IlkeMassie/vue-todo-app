@@ -1,12 +1,57 @@
 <script setup lang="ts">
 
+import { ref } from 'vue';
 import deleteIcon from '../assets/delete.png'
+import tagIcon from '../assets/price-tag.png'
 
-defineProps({
-    title: String,
-    index: Number,
-    completed: Boolean
-})
+
+type Category = {
+    title: string, 
+    color: string
+}
+
+const props = defineProps<({
+    title: string,
+    index: number,
+    completed: boolean,
+    categories: Category[],
+    todoCategoryTitle: string | undefined,
+    todoCategoryColor: string | undefined
+})>()
+
+const emit = defineEmits(['updateCategory', 'toggleCompleted', 'deleteTodo'])
+
+const showCategorySelect = ref(false);
+
+const selectedCategory = ref(props.categories.length ? props.categories[0].title : '');
+
+
+function toggleCategorySelect(){
+    showCategorySelect.value =!showCategorySelect.value;
+}
+function emitCategoryChange(){
+    try {
+       showCategorySelect.value = false; //to close the select list
+
+        if(props.categories.length === 0){
+            console.error('Categories array is empty')
+            return
+        }
+
+        const selectedCategoryObject = props.categories.find(category => category.title === selectedCategory.value)
+
+        if (selectedCategoryObject){          
+            emit('updateCategory', {index: props.index, newCategory: selectedCategoryObject});
+        } else {
+            console.warn("No matching category found for ", selectedCategory.value)
+        } 
+    }
+    catch (error){
+        console.log('Error emitting category change: ', error)
+    }
+    
+}
+
 
 </script>
 
@@ -20,8 +65,17 @@ defineProps({
             />
             {{title}}
         </div>
+        <div>
+            <span :style="{backgroundColor: todoCategoryColor}">{{todoCategoryTitle}}</span>
+            <button @click="toggleCategorySelect">
+                <img :src="tagIcon" alt="tag">
+            </button>
+            <select v-if="showCategorySelect" v-model="selectedCategory" @change="emitCategoryChange">
+                <option v-for="category in categories" :key="category.title" :value="category.title">{{ category.title }}</option>
+            </select>
+            <button @click="$emit('deleteTodo', index)"><img :src="deleteIcon" alt="delete" /></button>
+        </div>
 
-        <button @click="$emit('deleteTodo', index)"><img :src="deleteIcon" alt="delete" /></button>
     </li>
 
 </template>
